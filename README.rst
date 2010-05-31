@@ -1,11 +1,11 @@
 Django RESTive
 ==============
 
-``restive`` is a library for enabling easy setup of a REST-like service in
+``restive`` is a library for enabling easy setup of a RESTful service in
 django, and provides code for both client and server-side setup.
 
 In keeping with DRY, ``restive`` gets all of the boiler-plate out of the way,
-allowing the intuitive creating rich ajax experience.
+allowing the intuitive creation of a rich ajax experience.
 
 Some important points:
 
