@@ -12,13 +12,13 @@ Some important points:
 - all communication is in JSON (this could be configurable, I guess, but I
   don't see any reason for it ATM)
 
-    - this means that callback **functions should return a dictionary**, which
-      JSON then serializes.
-    - the **serialization of django models** is also supported: if the
-      returned dictionary has a "_models" key, it should be a list of ORM
-      instances, and it gets serialized by Django's builtin json serializer.
-    - javascript POSTing to the service should put all passed data (keyword
-      arguments) as JSON text under the key ``data``.
+  - this means that callback **functions should return a dictionary**, which
+    JSON then serializes.
+  - the **serialization of django models** is also supported: if the
+    returned dictionary has a "_models" key, it should be a list of ORM
+    instances, and it gets serialized by Django's builtin json serializer.
+  - javascript POSTing to the service should put all passed data (keyword
+    arguments) as JSON text under the key ``data``.
 
 - all communication is verified by a CSRF token, to prevent forgeries. (not
   yet implemented)
