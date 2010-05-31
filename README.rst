@@ -29,7 +29,7 @@ Here's restive's "Hello World"::
 
     from restive import Service
 
-    service = Servive('Hello World') ## just give it a name
+    service = Service()
 
     @service.add
     def greet(request, name='Jimmy'):

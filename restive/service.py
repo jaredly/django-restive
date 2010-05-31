@@ -8,9 +8,8 @@ from django.conf.urls.defaults import patterns
 import traceback
 
 class Service:
-    def __init__(self, name, prefix = ''):
+    def __init__(self, prefix = ''):
         self.url_list = []
-        self.name = name
         self.prefix = prefix
 
     def add(self, function=None, prefix='', name=None):
