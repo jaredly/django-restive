@@ -43,8 +43,8 @@ the service in your ``urls.py``. For example, if the above code were in
 
     from django.conf.urls.defaults import *
 
-    urlpatters = patterns('',
-        include('^hello/', include('hello_app.rest')),
+    urlpatterns = patterns('',
+        ('^hello/', include('hello_app.rest')),
     )
 
 The ``greet`` function would then be available at ``http://mysite.com/hello/greet``
