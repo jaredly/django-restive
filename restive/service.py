@@ -16,7 +16,9 @@ class Service:
         def actual_dec(function):
             def meta(request):
                 try:
-                    data = json.loads(request.POST['data'])
+                    data = json.loads(getattr(request, request.method)['data'])
+                except KeyError:
+                    res = {'error': 'invalid arguments [no "data" key]'}
                 except:
                     res = {'error': 'invalid arguments [not JSON]'}
                 else:
