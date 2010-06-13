@@ -4,8 +4,11 @@ from django.core import serializers
 from django.http import HttpResponse
 
 from django.conf.urls.defaults import patterns
+from django.conf import settings
 
 import traceback
+
+class NeverRaised(Exception): pass
 
 class Service:
     def __init__(self, prefix = ''):
@@ -16,7 +19,7 @@ class Service:
         def actual_dec(function):
             def meta(request):
                 try:
-                    data = json.loads(getattr(request, request.method)['data'])
+                    data = json.loads(getattr(request, request.method).get('data', {}))
                 except KeyError:
                     res = {'error': 'invalid arguments [no "data" key]'}
                 except:
@@ -24,9 +27,9 @@ class Service:
                 else:
                     try:
                         res = function(request, **data)
-                    except TypeError:
+                    except NeverRaised if settings.DEBUG else TypeError:
                         res = {'error':'invalid arguments '+str(data), 'tb':traceback.format_exc()}
-                    except Exception,e:
+                    except NeverRaised if settings.DEBUG else Exception,e:
                         res = {'error':str(e), 'tb':traceback.format_exc()}
                     else:
                         if not res.has_key('error'):
