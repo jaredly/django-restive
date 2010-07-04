@@ -7,6 +7,12 @@ from django.conf.urls.defaults import patterns
 
 import traceback
 
+def process_data(data):
+    if isinstance(data, dict) and data.has_key('_models'):
+        data['_models'] = serializers.serialize('json', data['_models'])
+    return HttpResponse(json.dumps(data), mimetype='application/json')
+
+
 class Service:
     def __init__(self, prefix = ''):
         self.url_list = []
@@ -14,24 +20,21 @@ class Service:
 
     def add(self, function=None, prefix='', name=None):
         def actual_dec(function):
-            def meta(request):
-                try:
-                    data = json.loads(request.POST['data'])
-                except:
-                    res = {'error': 'invalid arguments [not JSON]'}
-                else:
+            def meta(request, *args, **kwargs):
+                if request.POST.has_key('data'):
                     try:
-                        res = function(request, **data)
-                    except TypeError:
-                        res = {'error':'invalid arguments '+str(data), 'tb':traceback.format_exc()}
-                    except Exception,e:
-                        res = {'error':str(e), 'tb':traceback.format_exc()}
-                    else:
-                        if not res.has_key('error'):
-                            res['error'] = None
-                if res.has_key('_models'):
-                    res['_models'] = serializers.serialize('json', res['_models'], use_natural_keys=True)
-                return HttpResponse(json.dumps(res))
+                        data = json.loads(request.POST['data'])
+                        kwargs.update(data)
+                    except:
+                        return process_data({'error': 'invalid arguments [not JSON]'})
+                try:
+                    res = function(request, *args, **kwargs)
+                except TypeError:
+                    res = {'error':'invalid arguments '+str(data), 'tb':traceback.format_exc()}
+                except Exception,e:
+                    res = {'error':str(e), 'tb':traceback.format_exc()}
+                return process_data(res)
+
             fname = name
             if fname is None:
                 fname = function.__name__

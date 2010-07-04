@@ -6,11 +6,13 @@ class Client:
         self.prefix = prefix
         self.loading = 0
         self.queue = []
-        self.listeners = {'start':[], 'end':[]}
+        self.listeners = {'start':[], 'end':[], 'before_send':[]}
         self.queueing = False
 
-    def send(self, command, data, callback, from_queue = False):
+    def send(self, command, data, callback = None, from_queue = False):
         self.loading += 1
+        for cb in self.listeners['before_send']:
+            cb(data)
         window.jQuery.ajax({
             'cache': False,
             'data': {'data':json.dumps(data)},
@@ -41,7 +43,8 @@ class Client:
             error = definedor(error, '')
             if from_queue:
                 self.advance_queue()
-            return callback({'error':'HTTP ERROR', 'text':text, 'errno':error})
+            if callback:
+                return callback({'error':'HTTP ERROR', 'text':text, 'errno':error})
         onerror._accept_undefined = True
         return onerror
 
@@ -51,14 +54,17 @@ class Client:
             if from_queue:
                 self.advance_queue()
             try:
-                data = dict(json.loads(text))
+                data = py(json.loads(text))
             except:
-                return callback({'error': 'JSON ERROR', 'data': text})
+                if callback:
+                    return callback({'error': 'JSON ERROR', 'data': text})
+                return
 
             if data.has_key('_models'):
-                data['_models'] = list(json.loads(data['_models']))
+                data['_models'] = py(json.loads(data['_models']))
 
-            callback(data)
+            if callback:
+                callback(data)
 
             for cb in self.listeners['end']:
                 cb()
