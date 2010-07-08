@@ -24,7 +24,8 @@ class Service:
                 if request.POST.has_key('data'):
                     try:
                         data = json.loads(request.POST['data'])
-                        kwargs.update(data)
+                        utfdata = dict((k.encode('utf-8'), v) for k, v in data.iteritems())
+                        kwargs.update(utfdata)
                     except:
                         return process_data({'error': 'invalid arguments [not JSON]'})
                 try:
