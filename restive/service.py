@@ -21,17 +21,17 @@ class Service:
     def add(self, function=None, prefix='', name=None):
         def actual_dec(function):
             def meta(request, *args, **kwargs):
-                if request.POST.has_key('data'):
+                if 'data' in getattr(request, request.method):
                     try:
-                        data = json.loads(request.POST['data'])
-                        utfdata = dict((k.encode('utf-8'), v) for k, v in data.iteritems())
-                        kwargs.update(utfdata)
+                        data = json.loads(getattr(request, request.method)['data'])
                     except:
                         return process_data({'error': 'invalid arguments [not JSON]'})
+                    utfdata = dict((k.encode('utf-8'), v) for k, v in data.iteritems())
+                    kwargs.update(utfdata)
                 try:
                     res = function(request, *args, **kwargs)
                 except TypeError:
-                    res = {'error':'invalid arguments '+str(data), 'tb':traceback.format_exc()}
+                    res = {'error':'invalid arguments: '+str(data), 'tb':traceback.format_exc()}
                 except Exception,e:
                     res = {'error':str(e), 'tb':traceback.format_exc()}
                 return process_data(res)
