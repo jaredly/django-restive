@@ -4,6 +4,7 @@ from django.core import serializers
 from django.http import HttpResponse
 
 from django.conf.urls.defaults import patterns
+from django.conf import settings
 
 import traceback
 
@@ -12,6 +13,7 @@ def process_data(data):
         data['_models'] = serializers.serialize('json', data['_models'])
     return HttpResponse(json.dumps(data), mimetype='application/json')
 
+class NeverRaised(Exception): pass
 
 class Service:
     def __init__(self, prefix = ''):
@@ -30,9 +32,9 @@ class Service:
                     kwargs.update(utfdata)
                 try:
                     res = function(request, *args, **kwargs)
-                except TypeError:
-                    res = {'error':'invalid arguments: '+str(data), 'tb':traceback.format_exc()}
-                except Exception,e:
+                except NeverRaised if settings.DEBUG else TypeError:
+                    res = {'error':'invalid arguments '+str(data), 'tb':traceback.format_exc()}
+                except NeverRaised if settings.DEBUG else Exception, e:
                     res = {'error':str(e), 'tb':traceback.format_exc()}
                 return process_data(res)
 
@@ -41,6 +43,7 @@ class Service:
                 fname = function.__name__
             self.url_list.append(['^' + self.prefix + prefix + fname + '/$', meta])
             return function
+
         if function is not None:
             return actual_dec(function)
         return actual_dec
